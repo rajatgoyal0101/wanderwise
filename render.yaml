@@ -1,0 +1,30 @@
+# Render Blueprint for the WanderWise backend.
+# Docs: https://render.com/docs/blueprint-spec
+#
+# Deploy flow:
+#   1. Render reads this file from the main branch.
+#   2. It cd's into wanderwise/server (rootDir), runs build + start.
+#   3. Render assigns a PORT env var automatically — server.js already
+#      uses `process.env.PORT`, so it just works.
+#   4. GROQ_API_KEY / GEMINI_API_KEY are marked `sync: false`,
+#      meaning Render prompts you for them in the dashboard rather
+#      than reading them from this committed file.
+
+services:
+  - type: web
+    name: wanderwise-server
+    runtime: node
+    plan: free
+    region: oregon            # cheapest free region; change if you want
+    rootDir: wanderwise/server
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    autoDeploy: true          # redeploys on every push to main
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: GROQ_API_KEY
+        sync: false           # filled in via Render dashboard
+      - key: GEMINI_API_KEY
+        sync: false           # optional fallback
