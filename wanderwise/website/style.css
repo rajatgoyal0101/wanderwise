@@ -189,6 +189,18 @@ img { max-width: 100%; display: block; }
   box-shadow: var(--shadow-sm);
 }
 
+.filter-count {
+  text-align: center;
+  color: var(--ink-soft);
+  font-size: 13px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: -28px 0 28px;
+  min-height: 1.4em;
+  transition: opacity 0.3s var(--ease);
+}
+.filter-count strong { color: var(--ocean); font-weight: 700; }
+
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));

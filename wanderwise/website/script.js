@@ -189,6 +189,7 @@ function renderCards() {
     : destinations.filter((d) => d.category === activeFilter);
 
   grid.innerHTML = '';
+  updateFilterCount(list.length);
   list.forEach((d, i) => {
     const card = document.createElement('article');
     card.className = `card cat-${categoryClass(d.category)}`;
@@ -229,6 +230,13 @@ function renderCards() {
 
 function categoryClass(cat) {
   return cat.toLowerCase().replace(/\s+/g, '-');
+}
+
+function updateFilterCount(count) {
+  const el = document.getElementById('filterCount');
+  if (!el) return;
+  const label = activeFilter === 'All' ? 'destinations' : activeFilter.toLowerCase();
+  el.innerHTML = `Showing <strong>${count}</strong> ${label}`;
 }
 
 function renderStars(level) {
