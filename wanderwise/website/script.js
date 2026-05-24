@@ -2,8 +2,34 @@
    WanderWise — frontend logic
    ============================================================ */
 
+// On GitHub Pages there's no backend — flip into a static-data demo mode.
+const IS_LIVE_DEPLOY = typeof location !== 'undefined' &&
+  (location.hostname.endsWith('github.io') || location.hostname.endsWith('pages.dev'));
 const API_BASE = 'http://localhost:3000';
 const MAX_HISTORY = 12;
+
+// Destinations embedded as a static fallback. Used on GitHub Pages where
+// /api/destinations isn't reachable. Mirrors server/destinations.js.
+const EMBEDDED_DESTINATIONS = [
+  { id: 'manali', category: 'Mountains', name: 'Manali', state: 'Himachal Pradesh', description: 'Pahadon ki rani! 🏔️ Snow-capped peaks, apple orchards aur Old Manali ke chill cafes — yeh jagah dil khush kar deti hai.', cost: 18000, adventureLevel: 4, bestSeason: 'October to February (snow), April to June (pleasant)', topThingsToDo: ['Solang Valley mein paragliding aur zorbing', 'Hadimba Temple aur Old Manali ka mast cafe-hopping'], idealDays: 5, taraTopPick: false, image: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=900&q=80' },
+  { id: 'leh-ladakh', category: 'Mountains', name: 'Leh-Ladakh', state: 'Ladakh', description: 'Bucket list ka king! 🏔️ Moonlike landscapes, Pangong ki neeli neeli jheel aur duniya ki sabse oonchi roads — adventure ka swarg.', cost: 35000, adventureLevel: 5, bestSeason: 'June to September', topThingsToDo: ['Pangong Lake camping aur Nubra Valley mein camel safari', 'Khardung La pass tak bike ride'], idealDays: 8, taraTopPick: true, image: 'https://images.unsplash.com/photo-1469474968028-56623f02e42e?w=900&q=80' },
+  { id: 'auli', category: 'Mountains', name: 'Auli', state: 'Uttarakhand', description: 'India ka Switzerland! ⛷️ Powdery snow slopes, Nanda Devi ka view aur Asia ki sabse lambi cable car — winter ka dream.', cost: 22000, adventureLevel: 4, bestSeason: 'December to March (skiing), April to June (trekking)', topThingsToDo: ['Skiing aur snowboarding lessons', 'Gurso Bugyal tak ka peaceful trek'], idealDays: 4, taraTopPick: false, image: 'https://images.unsplash.com/photo-1494783367193-149034c05e8f?w=900&q=80' },
+  { id: 'tawang', category: 'Mountains', name: 'Tawang', state: 'Arunachal Pradesh', description: 'Northeast ka chhupa moti! 🛕 Buddhist monasteries, prayer flags aur Sela Pass ki frozen lakes — yahan time ruk jaata hai.', cost: 28000, adventureLevel: 4, bestSeason: 'March to October', topThingsToDo: ['Tawang Monastery aur Madhuri Lake darshan', 'Sela Pass aur Bumla border drive'], idealDays: 6, taraTopPick: false, image: 'https://images.unsplash.com/photo-1605649487212-47bdab064df7?w=900&q=80' },
+  { id: 'goa', category: 'Beaches', name: 'Goa', state: 'Goa', description: 'Susegad ki capital! 🏖️ North ke party beaches, South ke calm vibes, Portuguese churches aur pao-bhaji jaisi seafood — sab mil jaata hai.', cost: 15000, adventureLevel: 3, bestSeason: 'November to February', topThingsToDo: ['Palolem aur Anjuna beach hopping', 'Dudhsagar waterfall trek aur Spice Plantation tour'], idealDays: 5, taraTopPick: false, image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=900&q=80' },
+  { id: 'andaman', category: 'Beaches', name: 'Andaman Islands', state: 'Andaman & Nicobar', description: 'Crystal clear paani ka jadoo! 🐠 Radhanagar beach ke sunsets aur Havelock ke coral reefs — scuba ke liye perfect.', cost: 40000, adventureLevel: 4, bestSeason: 'October to May', topThingsToDo: ['Havelock Island mein scuba diving aur snorkeling', 'Cellular Jail ka light & sound show'], idealDays: 7, taraTopPick: true, image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=900&q=80' },
+  { id: 'gokarna', category: 'Beaches', name: 'Gokarna', state: 'Karnataka', description: 'Goa ka chhota bhai, but zyada peaceful! 🌊 Om Beach, Half Moon aur Paradise beach ka trek — hippie soul ke liye banaya gaya.', cost: 12000, adventureLevel: 3, bestSeason: 'October to March', topThingsToDo: ['Beach trek from Om to Paradise via Half Moon', 'Mahabaleshwar Temple aur sunset at Kudle Beach'], idealDays: 4, taraTopPick: false, image: 'https://images.unsplash.com/photo-1518002171953-a080ee817e1f?w=900&q=80' },
+  { id: 'varkala', category: 'Beaches', name: 'Varkala', state: 'Kerala', description: 'Cliff ke upar beach! 🌴 Arabian Sea ke side me red cliffs, ayurvedic spas aur cliffside cafes — Kerala ki shaant beauty.', cost: 16000, adventureLevel: 2, bestSeason: 'November to March', topThingsToDo: ['Cliffside cafe-hopping aur sunset views', 'Janardanaswamy Temple aur Ayurvedic massage'], idealDays: 4, taraTopPick: false, image: 'https://images.unsplash.com/photo-1577717903315-1691ae25ab3f?w=900&q=80' },
+  { id: 'jaipur', category: 'Heritage Cities', name: 'Jaipur', state: 'Rajasthan', description: 'Pink City ki shaan! 👑 Hawa Mahal, Amer Fort aur bazaar ka shopping — har gali mein royalty ki khushboo aati hai.', cost: 14000, adventureLevel: 2, bestSeason: 'October to March', topThingsToDo: ['Amer Fort aur City Palace ka tour', 'Johari Bazaar mein shopping aur Rajasthani thali'], idealDays: 4, taraTopPick: false, image: 'https://images.unsplash.com/photo-1599661046289-e31897846e41?w=900&q=80' },
+  { id: 'varanasi', category: 'Heritage Cities', name: 'Varanasi', state: 'Uttar Pradesh', description: 'Duniya ki sabse purani jeevit city! 🪔 Ganga aarti, narrow gallis, paan aur kachori — yahan har moment ek experience hai.', cost: 11000, adventureLevel: 2, bestSeason: 'October to March', topThingsToDo: ['Dashashwamedh Ghat ki shaam wali Ganga Aarti', 'Sunrise boat ride aur Sarnath day-trip'], idealDays: 3, taraTopPick: false, image: 'https://images.unsplash.com/photo-1561361513-2d000a50f0dc?w=900&q=80' },
+  { id: 'hampi', category: 'Heritage Cities', name: 'Hampi', state: 'Karnataka', description: 'Patthar ka jaadu nagar! 🗿 Vijayanagara empire ke khandhar, boulder-filled landscape aur sunset at Matanga Hill — UNESCO ka gem.', cost: 13000, adventureLevel: 3, bestSeason: 'October to February', topThingsToDo: ['Virupaksha Temple aur Vittala Temple ke stone chariot', 'Matanga Hill sunset aur coracle ride'], idealDays: 4, taraTopPick: true, image: 'https://images.unsplash.com/photo-1593693411515-c20261bcad6e?w=900&q=80' },
+  { id: 'madurai', category: 'Heritage Cities', name: 'Madurai', state: 'Tamil Nadu', description: 'Temples ki city of nectar! 🛕 Meenakshi Amman temple ke colourful gopurams aur South Indian filter coffee — soul food.', cost: 10000, adventureLevel: 2, bestSeason: 'October to March', topThingsToDo: ['Meenakshi Amman Temple darshan aur night ritual', 'Thirumalai Nayakkar Mahal aur jasmine bazaar walk'], idealDays: 3, taraTopPick: false, image: 'https://images.unsplash.com/photo-1582510003544-4d00b7f74220?w=900&q=80' },
+  { id: 'ziro', category: 'Hidden Gems', name: 'Ziro Valley', state: 'Arunachal Pradesh', description: 'Apatani tribe ka ghar! 🌾 Pine hills, rice fields aur har September ka Ziro Music Festival — chhupa hua paradise.', cost: 25000, adventureLevel: 3, bestSeason: 'March to October', topThingsToDo: ['Apatani village walk aur Talley Valley Wildlife Sanctuary', 'Ziro Music Festival (September)'], idealDays: 5, taraTopPick: false, image: 'https://images.unsplash.com/photo-1473625247510-8ceb1760943f?w=900&q=80' },
+  { id: 'khajjiar', category: 'Hidden Gems', name: 'Khajjiar', state: 'Himachal Pradesh', description: 'Mini Switzerland of India! 🌲 Open meadows, deodar forests aur ek tiny lake — Instagram ka favourite kona.', cost: 14000, adventureLevel: 2, bestSeason: 'March to June, September to November', topThingsToDo: ['Meadow walks aur zorbing', 'Kalatop Wildlife Sanctuary trek'], idealDays: 3, taraTopPick: false, image: 'https://images.unsplash.com/photo-1455729552865-3658a5d39692?w=900&q=80' },
+  { id: 'majuli', category: 'Hidden Gems', name: 'Majuli', state: 'Assam', description: 'Duniya ka sabse bada river island! 🌅 Brahmaputra ke beech mein satras, mask-making artisans aur Assamese bhog — soulful.', cost: 18000, adventureLevel: 3, bestSeason: 'November to March', topThingsToDo: ['Satras (Vaishnav monasteries) ka tour', 'Mask-making workshop aur sunset over Brahmaputra'], idealDays: 4, taraTopPick: false, image: 'https://images.unsplash.com/photo-1571536802807-30451e3955d8?w=900&q=80' },
+  { id: 'spiti', category: 'Hidden Gems', name: 'Spiti Valley', state: 'Himachal Pradesh', description: 'Cold desert ka chamatkar! 🏔️ Key Monastery, Chandratal lake aur Hikkim ka world\'s highest post office — raw beauty at its best.', cost: 30000, adventureLevel: 5, bestSeason: 'May to October', topThingsToDo: ['Key Monastery aur Chandratal Lake camping', 'Hikkim post office aur Langza fossil village'], idealDays: 8, taraTopPick: true, image: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=900&q=80' }
+];
+
+const LIVE_CHAT_NOTE = `Namaste! Live demo par chat offline rehti hai — kyunki Tara ka dimaag ek backend server par chalta hai, aur GitHub Pages sirf static files serve karta hai. Locally chalane ke liye: repo clone karo, "cd wanderwise/server && npm install && npm start", phir website kholo. Tab tak destinations explore karo — sab kuch dekh sakte ho!`;
 
 // ─── State ──────────────────────────────────────────────────
 let destinations = [];
@@ -162,6 +188,14 @@ function wireMute() {
 // ─── Destinations ───────────────────────────────────────────
 async function loadDestinations() {
   const status = document.getElementById('cardsStatus');
+
+  if (IS_LIVE_DEPLOY) {
+    destinations = EMBEDDED_DESTINATIONS;
+    status.textContent = '';
+    renderCards();
+    return;
+  }
+
   try {
     const res = await fetch(`${API_BASE}/api/destinations`);
     const json = await res.json();
@@ -170,8 +204,11 @@ async function loadDestinations() {
     status.textContent = '';
     renderCards();
   } catch (err) {
-    status.textContent = 'Hmm, destinations load nahi ho paaye. Check if the server is running on port 3000.';
-    console.error(err);
+    // Backend not reachable — fall back to embedded data so the cards still render.
+    destinations = EMBEDDED_DESTINATIONS;
+    status.textContent = '';
+    renderCards();
+    console.warn('Backend unreachable, using embedded destinations:', err.message);
   }
 }
 
@@ -294,8 +331,11 @@ function wireChat() {
     panel.setAttribute('aria-hidden', open ? 'false' : 'true');
     if (open && !chatOpenedOnce) {
       chatOpenedOnce = true;
-      appendBubble('tara', `Namaste! Main Tara hoon — aapki travel sakhi. Bataiye, kahan ka mood hai aaj? Pahad, samudra, virasat, ya kuch chhupa hua?`);
-      chatHistory.push({ role: 'assistant', text: 'Namaste! Main Tara hoon — aapki travel sakhi. Bataiye, kahan ka mood hai aaj? Pahad, samudra, virasat, ya kuch chhupa hua?' });
+      const greeting = IS_LIVE_DEPLOY
+        ? LIVE_CHAT_NOTE
+        : `Namaste! Main Tara hoon — aapki travel sakhi. Bataiye, kahan ka mood hai aaj? Pahad, samudra, virasat, ya kuch chhupa hua?`;
+      appendBubble('tara', greeting);
+      chatHistory.push({ role: 'assistant', text: greeting });
     }
     if (open) setTimeout(() => input.focus(), 200);
   });
@@ -332,6 +372,11 @@ async function sendUserMessage(text) {
   appendBubble('user', text);
   chatHistory.push({ role: 'user', text });
   trimHistory();
+
+  if (IS_LIVE_DEPLOY) {
+    appendBubble('tara', LIVE_CHAT_NOTE);
+    return;
+  }
 
   const bookingIntent = looksLikeBookingIntent(text);
 
