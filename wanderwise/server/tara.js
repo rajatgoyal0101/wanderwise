@@ -8,10 +8,11 @@ const HAS_GEMINI = !!process.env.GEMINI_API_KEY;
 const PROVIDER = process.env.LLM_PROVIDER
   || (HAS_GEMINI ? 'gemini' : (HAS_GROQ ? 'groq' : 'gemini'));
 
-// gemini-2.5-flash-lite avoids two traps at once:
-//   1. The "thinking" budget that swallows tokens on gemini-2.5-flash / flash-latest.
-//   2. The narrower free-tier quota of gemini-2.0-flash that newly-issued keys often hit.
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
+// gemini-2.5-flash is what the user's paid tier covers. It's a "thinking" model
+// by default, so we set thinkingConfig.thinkingBudget=0 in the request body —
+// otherwise the model burns the whole maxOutputTokens budget on hidden reasoning
+// and returns empty text.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse`;
@@ -84,7 +85,14 @@ function buildGeminiBody(message, history) {
   return {
     systemInstruction: { parts: [{ text: SYSTEM_PROMPT }] },
     contents,
-    generationConfig: { temperature: 0.85, topP: 0.95, maxOutputTokens: 400 },
+    generationConfig: {
+      temperature: 0.85,
+      topP: 0.95,
+      maxOutputTokens: 400,
+      // Required for gemini-2.5-flash and flash-latest — without this they spend
+      // the entire maxOutputTokens on hidden reasoning and return empty text.
+      thinkingConfig: { thinkingBudget: 0 }
+    },
     safetySettings: [
       { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_ONLY_HIGH' },
       { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_ONLY_HIGH' },
