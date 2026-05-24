@@ -1,13 +1,17 @@
 const destinations = require('./destinations');
 
 // ── Provider selection ─────────────────────────────────────
-// Prefer Groq if its key is present (free, no card, generous limits).
-// Fall back to Gemini if only that key is set.
+// Prefer Gemini when its key is present; only fall back to Groq if Gemini
+// is not configured. Set GEMINI_PROVIDER=groq explicitly to force Groq.
 const HAS_GROQ = !!process.env.GROQ_API_KEY;
 const HAS_GEMINI = !!process.env.GEMINI_API_KEY;
-const PROVIDER = HAS_GROQ ? 'groq' : 'gemini';
+const PROVIDER = process.env.LLM_PROVIDER
+  || (HAS_GEMINI ? 'gemini' : (HAS_GROQ ? 'groq' : 'gemini'));
 
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+// gemini-2.5-flash-lite avoids two traps at once:
+//   1. The "thinking" budget that swallows tokens on gemini-2.5-flash / flash-latest.
+//   2. The narrower free-tier quota of gemini-2.0-flash that newly-issued keys often hit.
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.5-flash-lite';
 const GROQ_MODEL = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
 
 const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:streamGenerateContent?alt=sse`;
