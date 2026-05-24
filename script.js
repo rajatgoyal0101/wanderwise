@@ -2,10 +2,11 @@
    WanderWise — frontend logic
    ============================================================ */
 
-// On GitHub Pages there's no backend — flip into a static-data demo mode.
+// On GitHub Pages we point at the Render-hosted backend.
 const IS_LIVE_DEPLOY = typeof location !== 'undefined' &&
   (location.hostname.endsWith('github.io') || location.hostname.endsWith('pages.dev'));
-const API_BASE = 'http://localhost:3000';
+const LIVE_BACKEND = 'https://wanderwise-server-s4o0.onrender.com';
+const API_BASE = IS_LIVE_DEPLOY ? LIVE_BACKEND : 'http://localhost:3000';
 const MAX_HISTORY = 12;
 
 // Destinations embedded as a static fallback. Used on GitHub Pages where
@@ -28,8 +29,6 @@ const EMBEDDED_DESTINATIONS = [
   { id: 'majuli', category: 'Hidden Gems', name: 'Majuli', state: 'Assam', description: 'Duniya ka sabse bada river island! 🌅 Brahmaputra ke beech mein satras, mask-making artisans aur Assamese bhog — soulful.', cost: 18000, adventureLevel: 3, bestSeason: 'November to March', topThingsToDo: ['Satras (Vaishnav monasteries) ka tour', 'Mask-making workshop aur sunset over Brahmaputra'], idealDays: 4, taraTopPick: false, image: 'https://images.unsplash.com/photo-1571536802807-30451e3955d8?w=900&q=80' },
   { id: 'spiti', category: 'Hidden Gems', name: 'Spiti Valley', state: 'Himachal Pradesh', description: 'Cold desert ka chamatkar! 🏔️ Key Monastery, Chandratal lake aur Hikkim ka world\'s highest post office — raw beauty at its best.', cost: 30000, adventureLevel: 5, bestSeason: 'May to October', topThingsToDo: ['Key Monastery aur Chandratal Lake camping', 'Hikkim post office aur Langza fossil village'], idealDays: 8, taraTopPick: true, image: 'https://images.unsplash.com/photo-1532375810709-75b1da00537c?w=900&q=80' }
 ];
-
-const LIVE_CHAT_NOTE = `Namaste! Live demo par chat offline rehti hai — kyunki Tara ka dimaag ek backend server par chalta hai, aur GitHub Pages sirf static files serve karta hai. Locally chalane ke liye: repo clone karo, "cd wanderwise/server && npm install && npm start", phir website kholo. Tab tak destinations explore karo — sab kuch dekh sakte ho!`;
 
 // ─── State ──────────────────────────────────────────────────
 let destinations = [];
@@ -189,6 +188,9 @@ function wireMute() {
 async function loadDestinations() {
   const status = document.getElementById('cardsStatus');
 
+  // On live deploy render the embedded copy IMMEDIATELY — Render free dynos
+  // sleep after 15 min idle and the first wake-up takes 30-60s. We don't
+  // want users staring at "Loading destinations…" all that time.
   if (IS_LIVE_DEPLOY) {
     destinations = EMBEDDED_DESTINATIONS;
     status.textContent = '';
@@ -204,7 +206,6 @@ async function loadDestinations() {
     status.textContent = '';
     renderCards();
   } catch (err) {
-    // Backend not reachable — fall back to embedded data so the cards still render.
     destinations = EMBEDDED_DESTINATIONS;
     status.textContent = '';
     renderCards();
@@ -331,11 +332,13 @@ function wireChat() {
     panel.setAttribute('aria-hidden', open ? 'false' : 'true');
     if (open && !chatOpenedOnce) {
       chatOpenedOnce = true;
-      const greeting = IS_LIVE_DEPLOY
-        ? LIVE_CHAT_NOTE
-        : `Namaste! Main Tara hoon — aapki travel sakhi. Bataiye, kahan ka mood hai aaj? Pahad, samudra, virasat, ya kuch chhupa hua?`;
+      const greeting = `Namaste! Main Tara hoon — aapki travel sakhi. Bataiye, kahan ka mood hai aaj? Pahad, samudra, virasat, ya kuch chhupa hua?`;
       appendBubble('tara', greeting);
       chatHistory.push({ role: 'assistant', text: greeting });
+      // Heads-up about Render cold start on live deploy — first reply may be slow.
+      if (IS_LIVE_DEPLOY) {
+        appendBubble('tara', 'Heads-up: pehli reply thodi slow ho sakti hai — server jaag rahi hai. Uske baad sab fast!');
+      }
     }
     if (open) setTimeout(() => input.focus(), 200);
   });
@@ -372,11 +375,6 @@ async function sendUserMessage(text) {
   appendBubble('user', text);
   chatHistory.push({ role: 'user', text });
   trimHistory();
-
-  if (IS_LIVE_DEPLOY) {
-    appendBubble('tara', LIVE_CHAT_NOTE);
-    return;
-  }
 
   const bookingIntent = looksLikeBookingIntent(text);
 
