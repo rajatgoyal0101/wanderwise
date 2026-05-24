@@ -1,0 +1,10 @@
+{
+  "name": "wanderwise-website-server",
+  "version": "1.0.0",
+  "description": "Tiny static server for the WanderWise frontend",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  }
+}

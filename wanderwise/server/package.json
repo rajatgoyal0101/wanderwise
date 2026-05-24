@@ -1,0 +1,19 @@
+{
+  "name": "wanderwise-server",
+  "version": "1.0.0",
+  "description": "WanderWise backend — destinations + Tara (Gemini)",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test:tara": "node test-tara.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  }
+}

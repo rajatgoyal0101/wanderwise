@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="WanderWise — Indian travel discovery with Tara, your Hinglish AI guide." />
+  <title>WanderWise · Duniya Dekhni Hai? Chalo Shuru Karte Hain</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ────────────── Top bar ────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">✦</span>
+      <span class="brand-name">WanderWise</span>
+    </div>
+    <button id="muteBtn" class="mute-btn" type="button" aria-pressed="true" title="Toggle ambient sound">
+      <span class="mute-icon" aria-hidden="true">🔇</span>
+      <span class="mute-label">Sound off</span>
+    </button>
+  </header>
+
+  <!-- ────────────── Welcome ────────────── -->
+  <section id="welcome" class="welcome">
+    <div class="welcome-inner">
+      <p class="kicker">A WanderWise Journey</p>
+      <h1 class="hero-title">
+        <span>Duniya Dekhni Hai?</span>
+        <span class="hero-accent">Chalo Shuru Karte Hain</span>
+      </h1>
+      <p class="hero-sub">Tara ke saath India ki chhupi hui jagahein dhoondho — pahad, samudra, virasat aur kuch raaz.</p>
+      <button id="startBtn" class="cta" type="button">
+        <span>Start Exploring</span>
+        <span class="cta-arrow" aria-hidden="true">→</span>
+      </button>
+    </div>
+    <div class="plane-field" id="planeField" aria-hidden="true"></div>
+    <div class="welcome-blob blob-a" aria-hidden="true"></div>
+    <div class="welcome-blob blob-b" aria-hidden="true"></div>
+  </section>
+
+  <!-- ────────────── Destinations ────────────── -->
+  <section id="destinations" class="destinations">
+    <div class="section-head">
+      <p class="kicker">Where to next?</p>
+      <h2>Pick your kind of magic</h2>
+      <p class="lede">Sixteen handpicked Indian destinations — filter karo apna mood aur Tara dikhayegi rasta.</p>
+    </div>
+
+    <div class="filters" role="tablist" aria-label="Destination filters">
+      <button class="filter is-active" data-filter="All" role="tab" aria-selected="true">All</button>
+      <button class="filter" data-filter="Mountains" role="tab" aria-selected="false">🏔️ Mountains</button>
+      <button class="filter" data-filter="Beaches" role="tab" aria-selected="false">🏖️ Beaches</button>
+      <button class="filter" data-filter="Heritage Cities" role="tab" aria-selected="false">🛕 Heritage Cities</button>
+      <button class="filter" data-filter="Hidden Gems" role="tab" aria-selected="false">✨ Hidden Gems</button>
+    </div>
+
+    <div id="cards" class="cards" aria-live="polite"></div>
+    <p id="cardsStatus" class="cards-status">Loading destinations…</p>
+  </section>
+
+  <!-- ────────────── About ────────────── -->
+  <section id="about" class="about">
+    <div class="about-grid">
+      <div class="compass-wrap" aria-hidden="true">
+        <div class="compass">
+          <div class="compass-ring"></div>
+          <div class="compass-rose">
+            <span class="needle north">N</span>
+            <span class="needle east">E</span>
+            <span class="needle south">S</span>
+            <span class="needle west">W</span>
+            <div class="compass-arrow"></div>
+          </div>
+        </div>
+      </div>
+      <div class="about-copy">
+        <p class="kicker">Why WanderWise</p>
+        <h2>Travel ki kahaani, ek dost ki zubaan se.</h2>
+        <p>Tara aapki travel sakhi hai — well-travelled, hamesha chai ke liye taiyaar. Woh aapke mood, budget aur mausam ke hisaab se bilkul sahi jagah suggest karti hai.</p>
+        <div class="stat">
+          <span id="counter" class="counter" data-target="50000">0</span>
+          <span class="stat-suffix">+ happy travellers</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ────────────── Footer ticker ────────────── -->
+  <footer class="footer">
+    <div class="ticker" aria-hidden="true">
+      <div class="ticker-track">
+        <span>Powered by wanderlust</span><span>•</span>
+        <span>Tara ne khud explore kiya</span><span>•</span>
+        <span>Made with chai and curiosity</span><span>•</span>
+        <span>Bilkul mast jagah, zaroor jaana</span><span>•</span>
+        <span>16 destinations, ek dost</span><span>•</span>
+        <!-- duplicate for seamless loop -->
+        <span>Powered by wanderlust</span><span>•</span>
+        <span>Tara ne khud explore kiya</span><span>•</span>
+        <span>Made with chai and curiosity</span><span>•</span>
+        <span>Bilkul mast jagah, zaroor jaana</span><span>•</span>
+        <span>16 destinations, ek dost</span><span>•</span>
+      </div>
+    </div>
+    <p class="footer-copy">© WanderWise · Made with ☕ &amp; curiosity</p>
+  </footer>
+
+  <!-- ────────────── Floating chat ────────────── -->
+  <button id="chatToggle" class="chat-toggle" type="button" aria-label="Chat with Tara">
+    <span class="chat-toggle-emoji" aria-hidden="true">🪷</span>
+    <span class="chat-toggle-dot" aria-hidden="true"></span>
+  </button>
+
+  <aside id="chatPanel" class="chat-panel" aria-hidden="true">
+    <header class="chat-head">
+      <div class="chat-id">
+        <div class="chat-avatar" aria-hidden="true">T</div>
+        <div>
+          <p class="chat-name">Tara</p>
+          <p class="chat-status">Your travel sakhi · online</p>
+        </div>
+      </div>
+      <button id="chatClose" class="chat-close" type="button" aria-label="Close chat">×</button>
+    </header>
+
+    <div id="chatStream" class="chat-stream" role="log" aria-live="polite"></div>
+
+    <div class="chat-quick" id="chatQuick">
+      <button class="quick" type="button">Best place for monsoon?</button>
+      <button class="quick" type="button">Budget-friendly trips?</button>
+      <button class="quick" type="button">Honeymoon destinations?</button>
+      <button class="quick" type="button">Adventure spots?</button>
+    </div>
+
+    <form id="chatForm" class="chat-form" autocomplete="off">
+      <input id="chatInput" class="chat-input" type="text" placeholder="Tara se kuch poocho…" maxlength="500" aria-label="Message Tara" />
+      <button id="chatSend" class="chat-send" type="submit" aria-label="Send">↑</button>
+    </form>
+  </aside>
+
+  <!-- toast -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+</body>
+</html>
